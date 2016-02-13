@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -671,6 +672,9 @@ namespace HttpMultipartParser
                 // ["content-type"] = "text/plain"
                 Dictionary<string, string> values = SplitBySemicolonIgnoringSemicolonsInQuotes(line)
                     .Select(x => x.Split(new[] {':', '='}, 2))
+                    // select where the length of the array is equal to two, that way if it is only one it will
+                    // be ignored as it is invalid key-pair
+                    .Where(x=> x.Length == 2)
                     // Limit split to 2 splits so we don't accidently split characters in file paths.
                     .ToDictionary(
                         x => x[0].Trim().Replace("\"", string.Empty).ToLower(),
@@ -721,6 +725,7 @@ namespace HttpMultipartParser
             // and if we are don't treat a semicolon as a splitting character.
             bool inQuotes = false;
             string workingString = "";
+
             foreach (char c in line)
             {
                 if (c == '"')
